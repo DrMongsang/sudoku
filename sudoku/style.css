@@ -1,0 +1,202 @@
+:root {
+    --board-size: 90vmin;
+    --cell-size: calc(var(--board-size) / 9);
+    --border-color: #e0e0e0; /* A light, clean grey */
+    --board-border-color: #bbbbbb; /* A stronger grey for the main border */
+    --primary-color: #4a90e2;
+    --user-input-color: #28a745; /* A distinct color for user input, e.g., green */
+    --background-color: #f0f2f5;
+    --font-color: #333;
+    --pre-filled-bg: #e9ecef;
+    --error-color: #d9534f;
+    --shaded-bg: #f7f7f7; /* A very subtle grey for alternating blocks */
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--font-color);
+}
+
+h1 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    width: var(--board-size);
+    height: var(--board-size);
+    border: 2px solid var(--board-border-color);
+    border-radius: 8px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    background-color: white;
+    overflow: hidden; /* Ensures inner cells conform to border-radius */
+}
+
+.cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--cell-size) * 0.5);
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Remove all special border handling for 3x3 sections */
+
+/* Remove outer borders */
+.cell[data-col='8'] {
+    border-right: none;
+}
+.row:last-child .cell {
+    border-bottom: none;
+}
+
+/* The new shading style for blocks */
+.cell.shaded-block {
+    background-color: var(--shaded-bg);
+}
+
+.pre-filled {
+    font-weight: bold;
+    background-color: var(--pre-filled-bg);
+}
+
+.main-value {
+    color: var(--font-color); /* Default color for main value */
+}
+
+.main-value.user-input {
+    color: var(--user-input-color); /* Color for user-entered numbers */
+}
+
+input {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    text-align: center;
+    font-size: inherit;
+    font-family: inherit;
+    background-color: transparent;
+    outline: none;
+}
+
+.note-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: calc(var(--cell-size) * 0.25);
+    color: #666;
+    pointer-events: none; /* Allows clicking through to the input */
+}
+
+.note-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+input:focus {
+    background-color: rgba(74, 144, 226, 0.1);
+}
+
+.cell.selected {
+    background-color: #a8c7fa;
+}
+
+.cell.highlighted {
+    background-color: #dce9fd;
+}
+
+.cell.highlighted-number {
+    font-weight: bold;
+}
+
+/* Ensure pre-filled cells also get highlighted */
+.pre-filled.highlighted, .cell.highlighted .pre-filled {
+    background-color: #dce9fd;
+}
+.pre-filled.selected, .cell.selected .pre-filled {
+    background-color: #a8c7fa;
+}
+
+input.error {
+    color: var(--error-color);
+    font-weight: bold;
+}
+
+#menu {
+    margin-top: 25px;
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+    justify-content: center;
+    gap: 15px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+button:hover, button:focus {
+    background-color: #357abd;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    outline: none;
+}
+
+.cell.hint {
+    background-color: #ffe0b2; /* Light orange for hint */
+    animation: hint-flash 1s ease-out;
+}
+
+@keyframes hint-flash {
+    0% { background-color: #ffe0b2; }
+    100% { background-color: transparent; }
+}
+
+#message {
+    margin-top: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--primary-color);
+    height: 25px;
+}
+
+#numpad {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+#numpad button {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+}
