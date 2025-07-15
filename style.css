@@ -144,7 +144,9 @@ input.error {
 }
 
 #menu {
-    margin-top: 25px;
+    margin-top: 30px; /* 数字パッドとの間隔を確保 */
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0; /* 視覚的な区切り線 */
     display: flex;
     flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
     justify-content: center;
@@ -188,17 +190,65 @@ button:hover, button:focus {
     height: 25px;
 }
 
+/* 数字パッドのレイアウト改善 */
 #numpad {
-    margin-top: 20px;
+    margin: 15px auto; /* ゲームボードとの間隔を調整 */
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
+    gap: 8px;
+    max-width: 300px; /* 最大幅を制限 */
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 #numpad button {
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
+    width: 55px;
+    height: 55px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+#numpad button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+#numpad button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* フォーカス時の視覚的フィードバック */
+#numpad button:focus {
+    outline: 3px solid #4a90e2;
+    outline-offset: 2px;
+}
+
+/* 選択されたセルがない場合の数字パッド無効化 */
+#numpad.disabled button {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#numpad.disabled button:hover {
+    transform: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* 消去ボタン（X）の特別なスタイル */
+#numpad button:last-child {
+    background-color: #dc3545;
+    color: white;
+}
+
+#numpad button:last-child:hover {
+    background-color: #c82333;
 }
 
 
@@ -767,6 +817,93 @@ button:hover, button:focus {
     color: #999;
 }
 
+/* 完成した行、列、ブロックのスタイル */
+.cell.completed-row {
+    background-color: #e8f5e8 !important; /* 薄い緑 */
+    border: 1px solid #4caf50;
+}
+
+.cell.completed-col {
+    background-color: #e3f2fd !important; /* 薄い青 */
+    border: 1px solid #2196f3;
+}
+
+.cell.completed-block {
+    background-color: #fff3e0 !important; /* 薄いオレンジ */
+    border: 1px solid #ff9800;
+}
+
+/* 複数の完成条件を満たす場合の優先順位 */
+.cell.completed-row.completed-col {
+    background-color: #f3e5f5 !important; /* 薄い紫（行+列） */
+    border: 1px solid #9c27b0;
+}
+
+.cell.completed-row.completed-block {
+    background-color: #e0f2f1 !important; /* 薄いティール（行+ブロック） */
+    border: 1px solid #009688;
+}
+
+.cell.completed-col.completed-block {
+    background-color: #fce4ec !important; /* 薄いピンク（列+ブロック） */
+    border: 1px solid #e91e63;
+}
+
+.cell.completed-row.completed-col.completed-block {
+    background-color: #fff9c4 !important; /* 薄い黄色（全て完成） */
+    border: 2px solid #ffc107;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+}
+
+/* アニメーション効果 */
+.cell.completed-row,
+.cell.completed-col,
+.cell.completed-block {
+    transition: all 0.3s ease;
+    animation: completedPulse 1s ease-out;
+}
+
+@keyframes completedPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+/* 事前入力セルの完成スタイル */
+.cell.pre-filled.completed-row,
+.cell.pre-filled.completed-col,
+.cell.pre-filled.completed-block {
+    font-weight: bold;
+    color: #2e7d32;
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+    .cell.completed-row {
+        background-color: #2e5d2e !important;
+        border-color: #4caf50;
+    }
+    
+    .cell.completed-col {
+        background-color: #1e3a5f !important;
+        border-color: #2196f3;
+    }
+    
+    .cell.completed-block {
+        background-color: #5f3e1e !important;
+        border-color: #ff9800;
+    }
+}
+
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
     #nav-tabs {
@@ -1176,6 +1313,106 @@ button:hover, button:focus {
     animation: fadeInUp 0.4s ease-out;
 }
 
+/* メッセージスタイル */
+.message {
+    padding: 12px;
+    border-radius: 8px;
+    margin: 8px;
+    text-align: center;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.message.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* セル選択時のアニメーション強化 */
+.cell.selected {
+    background-color: #2196F3 !important;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+/* 数字入力時のアニメーション */
+.cell.just-filled {
+    animation: cellFill 0.5s ease;
+}
+
+@keyframes cellFill {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); background-color: #4CAF50; }
+    100% { transform: scale(1); }
+}
+
+/* エラー時のアニメーション */
+.cell.error-shake {
+    animation: errorShake 0.5s ease;
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* 成功時のパルスアニメーション */
+.cell.success-pulse {
+    animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+    50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+/* ヒント表示時のグロー効果 */
+.cell.hint-glow {
+    animation: hintGlow 1.5s ease-in-out;
+}
+
+@keyframes hintGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.8); }
+}
+
+/* 関連セルのハイライト強化 */
+.cell.related-highlight {
+    background-color: rgba(33, 150, 243, 0.1);
+    border: 2px solid rgba(33, 150, 243, 0.3);
+    transition: all 0.2s ease;
+}
+
+/* 競合セルの警告表示 */
+.cell.conflict-warning {
+    background-color: rgba(244, 67, 54, 0.1);
+    border: 2px solid rgba(244, 67, 54, 0.3);
+    animation: conflictPulse 1s infinite;
+}
+
+@keyframes conflictPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
 /* レスポンシブ対応 */
 @media (max-width: 1024px) {
     #ai-assistant {
@@ -1209,7 +1446,7 @@ button:hover, button:focus {
     }
 }
 
-/* モバイル対応の大幅改善 */
+/* モバイル専用レイアウト */
 @media (max-width: 480px) {
     /* 基本レイアウト */
     body {
@@ -1229,8 +1466,15 @@ button:hover, button:focus {
         --cell-size: calc(var(--board-size) / 9);
     }
     
+    /* ゲームボードを画面に最適化 */
     #game-board {
-        margin: 15px auto;
+        width: 95vw;
+        max-width: 400px;
+        margin: 10px auto;
+        padding: 10px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         border-width: 3px; /* より太いボーダー */
     }
     
@@ -1250,23 +1494,31 @@ button:hover, button:focus {
     /* ナンバーパッドの最適化 */
     #numpad {
         grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        margin: 20px auto;
-        max-width: 300px;
+        gap: 6px;
+        margin: 10px auto;
+        max-width: 280px;
     }
     
     #numpad button {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
         font-weight: bold;
         border-radius: 10px;
         box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        margin: 4px;
     }
     
     #numpad button:active {
         transform: scale(0.9);
         box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        background-color: #2196F3;
+        color: white;
+    }
+    
+    /* ゲームボードとの視覚的な関連性を強化 */
+    #game-board {
+        margin-bottom: 5px;
     }
     
     /* メニューボタンの最適化 */
@@ -1286,6 +1538,17 @@ button:hover, button:focus {
     }
     
     /* タブナビゲーションの改善 */
+    .tab-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 1px solid #ddd;
+        padding: 8px;
+        z-index: 1000;
+    }
+    
     #nav-tabs {
         flex-wrap: wrap;
         gap: 5px;
@@ -1294,10 +1557,40 @@ button:hover, button:focus {
     
     .tab-btn {
         flex: 1;
-        min-width: 80px;
         padding: 12px 8px;
-        font-size: 13px;
-        border-radius: 6px;
+        font-size: 12px;
+        border-radius: 8px;
+        margin: 0 2px;
+        min-width: 80px;
+    }
+    
+    /* コンテンツエリアの調整 */
+    .tab-content {
+        padding-bottom: 80px; /* タブナビ分の余白 */
+        overflow-y: auto;
+        max-height: calc(100vh - 80px);
+    }
+    
+    /* プレイヤー情報の簡素化 */
+    #player-info {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 16px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        margin: 8px;
+        font-size: 14px;
+    }
+    
+    #time-display {
+        font-size: 18px;
+        font-weight: bold;
+        color: #2196F3;
+    }
+    
+    #progress-bar {
+        width: 100%;
+        height: 25px;
     }
     
     /* AIアシスタントパネルの最適化 */
@@ -1328,19 +1621,6 @@ button:hover, button:focus {
         padding: 15px 8px;
         font-size: 14px;
         min-height: 50px;
-    }
-    
-    /* プレイヤー情報パネルの最適化 */
-    #player-info {
-        flex-direction: column;
-        gap: 10px;
-        padding: 15px;
-        font-size: 14px;
-    }
-    
-    #progress-bar {
-        width: 100%;
-        height: 25px;
     }
     
     /* ヒントパネルの最適化 */
@@ -1438,11 +1718,6 @@ button:hover, button:focus {
         border-radius: 8px;
         background: rgba(74, 144, 226, 0.1);
     }
-    
-    /* スクロール改善 */
-    .tab-content {
-        padding-bottom: 50px; /* 下部余白を追加 */
-    }
 }
 
 /* 極小画面（320px以下）の追加対応 */
@@ -1465,6 +1740,48 @@ button:hover, button:focus {
         height: 50px;
         font-size: 20px;
     }
+
+/* タブレット向けの最適化 */
+@media (min-width: 481px) and (max-width: 768px) {
+    #numpad {
+        margin: 20px auto;
+        gap: 10px;
+        max-width: 350px;
+    }
+    
+    #numpad button {
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+    }
+}
+
+/* デスクトップ向けの最適化 */
+@media (min-width: 769px) {
+    #numpad {
+        margin: 25px auto;
+        gap: 12px;
+        max-width: 400px;
+    }
+    
+    #numpad button {
+        width: 65px;
+        height: 65px;
+        font-size: 22px;
+    }
+}
+
+/* 数字パッドとゲームボードの視覚的統一 */
+#game-board, #numpad {
+    border-radius: 8px;
+}
+
+/* メニューボタンとの区別 */
+#menu {
+    margin-top: 30px; /* 数字パッドとの間隔を確保 */
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0; /* 視覚的な区切り線 */
+}
     
     #menu {
         grid-template-columns: 1fr;
@@ -1477,27 +1794,123 @@ button:hover, button:focus {
     }
 }
 
-/* タッチデバイス専用の改善 */
-@media (hover: none) and (pointer: coarse) {
-    /* タッチフィードバックの改善 */
-    button:active,
-    .cell:active,
-    .tab-btn:active {
-        transform: scale(0.95);
-        transition: transform 0.1s ease;
+/* スマートフォン最適化 */
+@media (max-width: 480px) {
+    /* パフォーマンス最適化 */
+    * {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
     }
     
-    /* ホバー効果を無効化 */
-    button:hover,
-    .cell:hover,
-    .tab-btn:hover {
-        transform: none;
-    }
-    
-    /* タッチ操作の視覚的フィードバック */
+    /* アニメーションの簡素化 */
     .cell {
-        -webkit-tap-highlight-color: rgba(74, 144, 226, 0.3);
-        tap-highlight-color: rgba(74, 144, 226, 0.3);
+        transition: background-color 0.1s ease !important;
+    }
+    
+    /* 不要なエフェクトを無効化 */
+    .cell:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* フォントレンダリング最適化 */
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeSpeed;
+    }
+    
+    /* スクロール最適化 */
+    body {
+        -webkit-overflow-scrolling: touch;
+        overflow-scrolling: touch;
+    }
+    
+    /* タッチ操作最適化 */
+    .cell, button {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    
+    /* メモリ使用量削減 */
+    .note-grid {
+        will-change: auto;
+    }
+    
+    /* レイアウト最適化 */
+    #game-board {
+        contain: layout style paint;
+    }
+}
+
+/* 極小画面用の追加最適化 */
+@media (max-width: 320px) {
+    /* さらなるパフォーマンス向上 */
+    .cell {
+        transition: none !important;
+    }
+    
+    /* 影効果を無効化 */
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+}
+
+/* タッチデバイス専用最適化 */
+@media (hover: none) and (pointer: coarse) {
+    /* セルのタッチ領域拡大 */
+    .cell {
+        cursor: default;
+        min-height: 50px;
+        min-width: 50px;
+        padding: 8px;
+        margin: 2px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    /* タッチフィードバック強化 */
+    .cell:active {
+        background-color: #4CAF50 !important;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+    
+    /* 数字パッドの改善 */
+    #numpad button {
+        min-height: 60px;
+        min-width: 60px;
+        font-size: 24px;
+        margin: 4px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    #numpad button:active {
+        transform: scale(0.95);
+        background-color: #2196F3;
+        color: white;
+    }
+    
+    /* メニューボタンの改善 */
+    button {
+        cursor: default;
+        min-height: 48px;
+        min-width: 48px;
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+        margin: 4px;
+    }
+    
+    button:active {
+        transform: scale(0.95);
+        opacity: 0.8;
     }
 }
 

@@ -118,10 +118,19 @@ function createNumpad() {
 
 // --- 3. USER INTERACTION ---
 function handleNumpadInput(num) {
-    if (selectedCell.row === -1) return;
+    if (selectedCell.row === -1) {
+        // セルが選択されていない場合の視覚的フィードバック
+        showMessage('セルを選択してください', 'warning');
+        return;
+    }
+    
     const { row, col } = selectedCell;
-
-    if (initialPuzzle[row][col] !== 0) return; // Cannot change pre-filled cells
+    
+    if (initialPuzzle[row][col] !== 0) {
+        // 事前入力セルの場合の視覚的フィードバック
+        showMessage('この数字は変更できません', 'info');
+        return;
+    }
 
     const mainValue = currentPuzzle[row][col];
     const noteSet = notes[row][col];
@@ -155,6 +164,15 @@ function handleNumpadInput(num) {
         }
     }
 
+    // 成功時のフィードバック
+    if (num !== 0) {
+        showMessage(`${num} を入力しました`, 'success');
+        // 軽い振動フィードバック（対応デバイスのみ）
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    }
+
     updateFullBoardDisplay();
     validateBoard();
     highlightAll();
@@ -169,17 +187,39 @@ function handleNumpadInput(num) {
     }
 }
 
+// メッセージ表示関数を追加
+function showMessage(text, type = 'info') {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = text;
+    messageEl.className = `message ${type}`;
+    
+    // 3秒後に自動消去
+    setTimeout(() => {
+        if (messageEl.textContent === text) {
+            messageEl.textContent = '';
+            messageEl.className = 'message';
+        }
+    }, 3000);
+}
+
 function selectCell(row, col) {
     selectedCell = { row, col };
     highlightAll();
 }
 
 function updateFullBoardDisplay() {
-    for (let r = 0; r < 9; r++) {
-        for (let c = 0; c < 9; c++) {
-            updateCellDisplay(r, c);
+    // パフォーマンス最適化：requestAnimationFrameを使用
+    if (window.updateBoardPending) return;
+    window.updateBoardPending = true;
+    
+    requestAnimationFrame(() => {
+        for (let r = 0; r < 9; r++) {
+            for (let c = 0; c < 9; c++) {
+                updateCellDisplay(r, c);
+            }
         }
-    }
+        window.updateBoardPending = false;
+    });
 }
 
 function updateCellDisplay(row, col) {
@@ -207,6 +247,10 @@ function updateCellDisplay(row, col) {
 // --- 4. HIGHLIGHTING ---
 function highlightAll() {
     clearHighlights();
+    
+    // 完成した行、列、ブロックをハイライト
+    highlightCompletedAreas();
+    
     if (selectedCell.row === -1) return;
 
     highlightRowColBox();
@@ -218,7 +262,8 @@ function highlightAll() {
 
 function clearHighlights() {
     document.querySelectorAll('.cell').forEach(c => {
-        c.classList.remove('selected', 'highlighted', 'highlighted-number', 'hint');
+        c.classList.remove('selected', 'highlighted', 'highlighted-number', 'hint', 
+                          'completed-row', 'completed-col', 'completed-block');
     });
 }
 
@@ -265,6 +310,92 @@ function validateBoard() {
         }
     }
     if (allValid && !isSolved()) message.textContent = '';
+    
+    // 完成した行、列、ブロックをハイライト
+    highlightCompletedAreas();
+}
+
+// 完成チェック関数
+function isRowComplete(row) {
+    const numbers = new Set();
+    for (let col = 0; col < 9; col++) {
+        const num = currentPuzzle[row][col];
+        if (num === 0 || numbers.has(num)) {
+            return false;
+        }
+        numbers.add(num);
+    }
+    return numbers.size === 9;
+}
+
+function isColComplete(col) {
+    const numbers = new Set();
+    for (let row = 0; row < 9; row++) {
+        const num = currentPuzzle[row][col];
+        if (num === 0 || numbers.has(num)) {
+            return false;
+        }
+        numbers.add(num);
+    }
+    return numbers.size === 9;
+}
+
+function isBlockComplete(blockRow, blockCol) {
+    const numbers = new Set();
+    const startRow = blockRow * 3;
+    const startCol = blockCol * 3;
+    
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            const num = currentPuzzle[startRow + i][startCol + j];
+            if (num === 0 || numbers.has(num)) {
+                return false;
+            }
+            numbers.add(num);
+        }
+    }
+    return numbers.size === 9;
+}
+
+// 完成した行、列、ブロックをハイライト
+function highlightCompletedAreas() {
+    // 既存の完成ハイライトをクリア
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.classList.remove('completed-row', 'completed-col', 'completed-block');
+    });
+    
+    // 完成した行をハイライト
+    for (let row = 0; row < 9; row++) {
+        if (isRowComplete(row)) {
+            for (let col = 0; col < 9; col++) {
+                getCell(row, col).classList.add('completed-row');
+            }
+        }
+    }
+    
+    // 完成した列をハイライト
+    for (let col = 0; col < 9; col++) {
+        if (isColComplete(col)) {
+            for (let row = 0; row < 9; row++) {
+                getCell(row, col).classList.add('completed-col');
+            }
+        }
+    }
+    
+    // 完成したブロックをハイライト
+    for (let blockRow = 0; blockRow < 3; blockRow++) {
+        for (let blockCol = 0; blockCol < 3; blockCol++) {
+            if (isBlockComplete(blockRow, blockCol)) {
+                const startRow = blockRow * 3;
+                const startCol = blockCol * 3;
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        getCell(startRow + i, startCol + j).classList.add('completed-block');
+                    }
+                }
+            }
+        }
+    }
 }
 
 function isValid(board, row, col, num) {
