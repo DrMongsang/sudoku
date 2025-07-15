@@ -1,10 +1,5 @@
-const gameBoard = document.getElementById('game-board');
-const newGameBtn = document.getElementById('new-game-btn');
-const resetBtn = document.getElementById('reset-btn');
-const solveBtn = document.getElementById('solve-btn');
-const hintBtn = document.getElementById('hint-btn');
-const numpad = document.getElementById('numpad');
-const message = document.getElementById('message');
+// DOM要素の参照は初期化時に取得するように変更
+let gameBoard, numpad, message;
 
 let initialPuzzle = [];
 let currentPuzzle = [];
@@ -28,6 +23,9 @@ const DIFFICULTY_SETTINGS = {
     hard: { name: '上級', cellsToRemove: 55 },
     expert: { name: 'エキスパート', cellsToRemove: 60 }
 };
+
+// メモモード
+let isMemoMode = false;
 
 // --- 1. PUZZLE GENERATION ---
 function generatePuzzle() {
@@ -96,8 +94,24 @@ function createBoard() {
                 cell.classList.add('shaded-block');
             }
 
+            // メイン数字用の要素
+            const mainNumber = document.createElement('div');
+            mainNumber.classList.add('cell-main-number');
+            cell.appendChild(mainNumber);
+
+            // メモ用の要素
+            const notesContainer = document.createElement('div');
+            notesContainer.classList.add('cell-notes');
+            for (let k = 1; k <= 9; k++) {
+                const noteDiv = document.createElement('div');
+                noteDiv.classList.add('note-number');
+                noteDiv.dataset.note = k;
+                notesContainer.appendChild(noteDiv);
+            }
+            cell.appendChild(notesContainer);
+
             if (initialPuzzle[i][j] !== 0) {
-                cell.textContent = initialPuzzle[i][j];
+                mainNumber.textContent = initialPuzzle[i][j];
                 cell.classList.add('pre-filled');
             }
             cell.addEventListener('click', () => selectCell(i, j));
@@ -108,25 +122,10 @@ function createBoard() {
     updateFullBoardDisplay();
 }
 
-function createNumpad() {
-    numpad.innerHTML = '';
-    for (let i = 1; i <= 9; i++) {
-        const btn = document.createElement('button');
-        btn.textContent = i;
-        btn.addEventListener('click', () => handleNumpadInput(i));
-        numpad.appendChild(btn);
-    }
-    const eraseBtn = document.createElement('button');
-    eraseBtn.textContent = 'X';
-    eraseBtn.addEventListener('click', () => handleNumpadInput(0));
-    numpad.appendChild(eraseBtn);
-}
-
-// --- 3. USER INTERACTION ---
+// handleNumpadInput関数を修正
 function handleNumpadInput(num) {
     if (selectedCell.row === -1) {
         showMessage('セルを選択してください', 'warning');
-        // セル選択を促すアニメーション
         gameBoard.classList.add('shake');
         setTimeout(() => gameBoard.classList.remove('shake'), 500);
         return;
@@ -136,82 +135,123 @@ function handleNumpadInput(num) {
     
     if (initialPuzzle[row][col] !== 0) {
         showMessage('この数字は変更できません', 'info');
-        // 変更不可セルのアニメーション
         const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
         cell.classList.add('invalid-input');
         setTimeout(() => cell.classList.remove('invalid-input'), 300);
         return;
     }
 
-    // 入力前の値を保存
-    const previousValue = currentPuzzle[row][col];
-    
-    if (num === 0) {
-        currentPuzzle[row][col] = 0;
-    } else {
-        currentPuzzle[row][col] = num;
-        
-        // 入力時のアニメーション
-        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-        cell.classList.add('number-input');
-        setTimeout(() => cell.classList.remove('number-input'), 300);
-        
-        // 競合チェックと視覚的フィードバック
-        if (!isValidPlacement(row, col, num)) {
-            highlightConflicts(row, col, num);
-            showMessage('この数字は配置できません', 'error');
-        }
-    }
-    
-    updateCellDisplay(row, col);
-    
-    if (isSolved()) {
-        handleGameComplete();
-    }
-}
-
-// 競合セルをハイライト
-function highlightConflicts(row, col, num) {
-    // 同じ行の競合
-    for (let j = 0; j < 9; j++) {
-        if (j !== col && currentPuzzle[row][j] === num) {
-            const cell = document.querySelector(`[data-row="${row}"][data-col="${j}"]`);
-            cell.classList.add('conflict');
-            setTimeout(() => cell.classList.remove('conflict'), 2000);
-        }
-    }
-    
-    // 同じ列の競合
-    for (let i = 0; i < 9; i++) {
-        if (i !== row && currentPuzzle[i][col] === num) {
-            const cell = document.querySelector(`[data-row="${i}"][data-col="${col}"]`);
-            cell.classList.add('conflict');
-            setTimeout(() => cell.classList.remove('conflict'), 2000);
-        }
-    }
-    
-    // 同じブロックの競合
-    const startRow = Math.floor(row / 3) * 3;
-    const startCol = Math.floor(col / 3) * 3;
-    for (let i = startRow; i < startRow + 3; i++) {
-        for (let j = startCol; j < startCol + 3; j++) {
-            if ((i !== row || j !== col) && currentPuzzle[i][j] === num) {
-                const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
-                cell.classList.add('conflict');
-                setTimeout(() => cell.classList.remove('conflict'), 2000);
+    if (isMemoMode) {
+        // メモモード
+        if (num === 0) {
+            // メモをすべてクリア
+            notes[row][col].clear();
+        } else {
+            // メモの切り替え
+            if (notes[row][col].has(num)) {
+                notes[row][col].delete(num);
+            } else {
+                notes[row][col].add(num);
             }
         }
+        updateCellDisplay(row, col);
+    } else {
+        // 通常モード
+        if (num === 0) {
+            currentPuzzle[row][col] = 0;
+        } else {
+            currentPuzzle[row][col] = num;
+            // 数字を入力したらそのセルのメモをクリア
+            notes[row][col].clear();
+            
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            cell.classList.add('number-input');
+            setTimeout(() => cell.classList.remove('number-input'), 300);
+            
+            if (!isValidPlacement(row, col, num)) {
+                highlightConflicts(row, col, num);
+                showMessage('この数字は配置できません', 'error');
+            }
+        }
+        
+        updateCellDisplay(row, col);
+        
+        if (isSolved()) {
+            handleGameComplete();
+        }
     }
 }
 
-function isValidPlacement(row, col, num) {
-    const temp = currentPuzzle[row][col];
-    currentPuzzle[row][col] = 0;
-    const valid = isValid(currentPuzzle, row, col, num);
-    currentPuzzle[row][col] = temp;
-    return valid;
+// updateCellDisplay関数を修正
+function updateCellDisplay(row, col) {
+    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    
+    // セル選択状態の更新
+    if (selectedCell.row === row && selectedCell.col === col) {
+        cell.classList.add('selected');
+    } else {
+        cell.classList.remove('selected');
+    }
+    
+    // メモ機能対応の表示更新
+    const mainNumber = cell.querySelector('.cell-main-number');
+    const notesContainer = cell.querySelector('.cell-notes');
+    
+    if (mainNumber && notesContainer) {
+        // メイン数字の表示
+        if (currentPuzzle[row][col] !== 0) {
+            mainNumber.textContent = currentPuzzle[row][col];
+            notesContainer.style.display = 'none';
+            cell.classList.add('filled');
+        } else {
+            mainNumber.textContent = '';
+            cell.classList.remove('filled');
+            
+            if (initialPuzzle[row][col] === 0) {
+                notesContainer.style.display = 'grid';
+                
+                // メモの表示
+                for (let i = 1; i <= 9; i++) {
+                    const noteDiv = notesContainer.querySelector(`[data-note="${i}"]`);
+                    if (noteDiv) {
+                        if (notes[row][col] && notes[row][col].has(i)) {
+                            noteDiv.textContent = i;
+                        } else {
+                            noteDiv.textContent = '';
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        // 旧形式のセル（メモ機能なし）
+        if (currentPuzzle[row][col] !== 0) {
+            cell.textContent = currentPuzzle[row][col];
+            cell.classList.add('filled');
+        } else if (initialPuzzle[row][col] === 0) {
+            cell.textContent = '';
+            cell.classList.remove('filled');
+        }
+    }
 }
 
+// メモモード切り替え関数
+function toggleMemoMode() {
+    isMemoMode = !isMemoMode;
+    const memoBtn = document.getElementById('memo-mode-btn');
+    if (memoBtn) {
+        if (isMemoMode) {
+            memoBtn.classList.add('active');
+            memoBtn.textContent = 'メモ中';
+        } else {
+            memoBtn.classList.remove('active');
+            memoBtn.textContent = 'メモ';
+        }
+    }
+    showMessage(isMemoMode ? 'メモモードON' : 'メモモードOFF', 'info');
+}
+
+// --- 3. CELL SELECTION & DISPLAY ---
 function showMessage(text, type = 'info') {
     const messageEl = document.getElementById('message');
     messageEl.textContent = text;
@@ -224,8 +264,30 @@ function showMessage(text, type = 'info') {
 }
 
 function selectCell(row, col) {
+    // 以前の選択をクリア
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.classList.remove('selected', 'highlighted');
+    });
+    
     selectedCell = { row, col };
-    updateFullBoardDisplay();
+    
+    // 新しい選択をハイライト
+    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    cell.classList.add('selected');
+    
+    // 同じ数字をハイライト
+    const currentNum = currentPuzzle[row][col];
+    if (currentNum !== 0) {
+        document.querySelectorAll('.cell').forEach(c => {
+            const r = parseInt(c.dataset.row);
+            const col = parseInt(c.dataset.col);
+            if (currentPuzzle[r][col] === currentNum) {
+                c.classList.add('highlighted');
+            }
+        });
+    }
+    
+    updateCellDisplay(row, col);
 }
 
 function updateFullBoardDisplay() {
@@ -233,26 +295,6 @@ function updateFullBoardDisplay() {
         for (let j = 0; j < 9; j++) {
             updateCellDisplay(i, j);
         }
-    }
-}
-
-function updateCellDisplay(row, col) {
-    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-    
-    // セル選択状態の更新
-    if (selectedCell.row === row && selectedCell.col === col) {
-        cell.classList.add('selected');
-    } else {
-        cell.classList.remove('selected');
-    }
-    
-    // 数字表示の更新
-    if (currentPuzzle[row][col] !== 0) {
-        cell.textContent = currentPuzzle[row][col];
-        cell.classList.add('filled');
-    } else if (initialPuzzle[row][col] === 0) {
-        cell.textContent = '';
-        cell.classList.remove('filled');
     }
 }
 
@@ -301,165 +343,158 @@ function isSolved() {
 function newGame() {
     generatePuzzle();
     createBoard();
+    selectedCell = { row: -1, col: -1 };
     startTimer();
-    showMessage('新しい問題を開始しました！');
+    updateProgress();
+    showMessage('新しいゲームを開始しました', 'success');
 }
 
 function resetCurrentPuzzle() {
     currentPuzzle = JSON.parse(JSON.stringify(initialPuzzle));
+    notes = Array(9).fill(0).map(() => Array(9).fill(0).map(() => new Set()));
     selectedCell = { row: -1, col: -1 };
     updateFullBoardDisplay();
-    showMessage('問題をリセットしました');
+    startTimer();
+    updateProgress();
+    showMessage('パズルをリセットしました', 'info');
 }
 
 function showSolution() {
     currentPuzzle = JSON.parse(JSON.stringify(solution));
     updateFullBoardDisplay();
     stopTimer();
-    showMessage('解答を表示しました');
+    showMessage('解答を表示しました', 'info');
 }
 
 // --- 6. HINT SYSTEM ---
 function findHint() {
-    // Naked Single を探す
+    // 空のセルを探す
+    const emptyCells = [];
     for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
             if (currentPuzzle[row][col] === 0) {
-                const possibleNumbers = getPossibleNumbers(currentPuzzle, row, col);
-                if (possibleNumbers.length === 1) {
-                    return {
-                        type: 'naked-single',
-                        row: row,
-                        col: col,
-                        value: possibleNumbers[0]
-                    };
-                }
+                emptyCells.push({ row, col });
             }
         }
     }
     
-    // Hidden Single を探す
-    for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
-            if (currentPuzzle[row][col] === 0) {
-                const possibleNumbers = getPossibleNumbers(currentPuzzle, row, col);
-                for (const num of possibleNumbers) {
-                    // 行での Hidden Single
-                    let canPlaceInRow = true;
-                    for (let j = 0; j < 9; j++) {
-                        if (j !== col && currentPuzzle[row][j] === 0) {
-                            const otherPossible = getPossibleNumbers(currentPuzzle, row, j);
-                            if (otherPossible.includes(num)) {
-                                canPlaceInRow = false;
-                                break;
-                            }
-                        }
-                    }
-                    if (canPlaceInRow) {
-                        return {
-                            type: 'hidden-single-row',
-                            row: row,
-                            col: col,
-                            value: num
-                        };
-                    }
-                    
-                    // 列での Hidden Single
-                    let canPlaceInCol = true;
-                    for (let i = 0; i < 9; i++) {
-                        if (i !== row && currentPuzzle[i][col] === 0) {
-                            const otherPossible = getPossibleNumbers(currentPuzzle, i, col);
-                            if (otherPossible.includes(num)) {
-                                canPlaceInCol = false;
-                                break;
-                            }
-                        }
-                    }
-                    if (canPlaceInCol) {
-                        return {
-                            type: 'hidden-single-col',
-                            row: row,
-                            col: col,
-                            value: num
-                        };
-                    }
-                    
-                    // ブロックでの Hidden Single
-                    const startRow = Math.floor(row / 3) * 3;
-                    const startCol = Math.floor(col / 3) * 3;
-                    let canPlaceInBox = true;
-                    for (let i = startRow; i < startRow + 3; i++) {
-                        for (let j = startCol; j < startCol + 3; j++) {
-                            if ((i !== row || j !== col) && currentPuzzle[i][j] === 0) {
-                                const otherPossible = getPossibleNumbers(currentPuzzle, i, j);
-                                if (otherPossible.includes(num)) {
-                                    canPlaceInBox = false;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!canPlaceInBox) break;
-                    }
-                    if (canPlaceInBox) {
-                        return {
-                            type: 'hidden-single-box',
-                            row: row,
-                            col: col,
-                            value: num
-                        };
-                    }
-                }
+    if (emptyCells.length === 0) return null;
+    
+    // 最も制約の多いセル（候補数が少ないセル）を優先的に選択
+    let bestCell = null;
+    let minCandidates = 10;
+    
+    for (const cell of emptyCells) {
+        const { row, col } = cell;
+        const candidates = [];
+        
+        // そのセルに入れられる数字を調べる
+        for (let num = 1; num <= 9; num++) {
+            if (isValidPlacement(row, col, num)) {
+                candidates.push(num);
             }
+        }
+        
+        // 候補が1つしかない場合は即座に選択
+        if (candidates.length === 1) {
+            return {
+                row,
+                col,
+                type: 'direct',
+                value: candidates[0],
+                message: `(${row + 1}, ${col + 1})には${candidates[0]}しか入りません`
+            };
+        }
+        
+        // 候補数が最も少ないセルを記録
+        if (candidates.length > 1 && candidates.length < minCandidates) {
+            minCandidates = candidates.length;
+            bestCell = {
+                row,
+                col,
+                type: 'candidates',
+                candidates: candidates,
+                message: `(${row + 1}, ${col + 1})の候補: ${candidates.join(', ')}`
+            };
         }
     }
     
-    return null;
-}
-
-function getPossibleNumbers(board, row, col) {
-    const possible = [];
+    // 直接的なヒントがない場合は候補を表示
+    if (bestCell) {
+        return bestCell;
+    }
+    
+    // それでもない場合はランダムなセルの候補を表示
+    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    const { row, col } = randomCell;
+    const candidates = [];
+    
     for (let num = 1; num <= 9; num++) {
-        if (isValid(board, row, col, num)) {
-            possible.push(num);
+        if (isValidPlacement(row, col, num)) {
+            candidates.push(num);
         }
     }
-    return possible;
+    
+    return {
+        row,
+        col,
+        type: 'candidates',
+        candidates: candidates,
+        message: `(${row + 1}, ${col + 1})の候補: ${candidates.join(', ')}`
+    };
 }
 
 function applyHint() {
     const hint = findHint();
     if (!hint) {
-        showMessage('これ以上のヒントはありません', 'info');
+        showMessage('ヒントがありません', 'info');
         return;
     }
     
-    let message = '';
-    if (hint.type === 'naked-single') {
-        message = `行${hint.row + 1}、列${hint.col + 1}には${hint.value}しか入りません`;
-    } else if (hint.type === 'hidden-single-row') {
-        message = `行${hint.row + 1}で${hint.value}が入るのは列${hint.col + 1}だけです`;
-    } else if (hint.type === 'hidden-single-col') {
-        message = `列${hint.col + 1}で${hint.value}が入るのは行${hint.row + 1}だけです`;
-    } else if (hint.type === 'hidden-single-box') {
-        message = `このブロックで${hint.value}が入るのは行${hint.row + 1}、列${hint.col + 1}だけです`;
-    }
+    const { row, col, type, message } = hint;
     
-    // セルをハイライト
-    selectCell(hint.row, hint.col);
+    // セルを選択してハイライト
+    selectCell(row, col);
     
-    const messageElement = document.getElementById('message');
-    if (messageElement) {
-        messageElement.innerHTML = message;
-        messageElement.classList.add('hint-message');
+    if (type === 'direct') {
+        // 直接的なヒント：数字を自動入力
+        currentPuzzle[row][col] = hint.value;
+        notes[row][col].clear();
+        updateCellDisplay(row, col);
+        updateProgress();
         
+        // セルを一時的にハイライト
+        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+        cell.classList.add('hint-highlight');
         setTimeout(() => {
-            messageElement.classList.remove('hint-message');
-        }, 8000);
+            cell.classList.remove('hint-highlight');
+        }, 2000);
+        
+        if (isSolved()) {
+            handleGameComplete();
+        }
+    } else {
+        // 候補ヒント：メモに候補を表示
+        notes[row][col].clear();
+        hint.candidates.forEach(num => {
+            notes[row][col].add(num);
+        });
+        updateCellDisplay(row, col);
+        
+        // セルを一時的にハイライト
+        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+        cell.classList.add('hint-highlight');
+        setTimeout(() => {
+            cell.classList.remove('hint-highlight');
+        }, 3000);
     }
+    
+    showMessage(message, 'success');
 }
 
-// --- 7. TIMER ---
+// --- 7. TIMER & PROGRESS ---
 function startTimer() {
+    stopTimer();
     startTime = Date.now();
     gameTimer = setInterval(updateTimer, 1000);
 }
@@ -473,27 +508,96 @@ function stopTimer() {
 
 function updateTimer() {
     if (!startTime) return;
+    
     const elapsed = Date.now() - startTime;
     const minutes = Math.floor(elapsed / 60000);
     const seconds = Math.floor((elapsed % 60000) / 1000);
-    document.getElementById('time-display').textContent = 
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    const timerEl = document.getElementById('timer');
+    if (timerEl) {
+        timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
 }
 
-// --- 8. DIFFICULTY SELECTION ---
+function updateProgress() {
+    let filledCells = 0;
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            if (currentPuzzle[i][j] !== 0) filledCells++;
+        }
+    }
+    
+    const progressText = document.getElementById('progress-text');
+    const progressFill = document.getElementById('progress-fill');
+    
+    if (progressText) progressText.textContent = `${filledCells}/81`;
+    if (progressFill) progressFill.style.width = `${(filledCells / 81) * 100}%`;
+}
+
+// --- 8. CONFLICT HIGHLIGHTING ---
+function isValidPlacement(row, col, num) {
+    const temp = currentPuzzle[row][col];
+    currentPuzzle[row][col] = 0;
+    const valid = isValid(currentPuzzle, row, col, num);
+    currentPuzzle[row][col] = temp;
+    return valid;
+}
+
+function highlightConflicts(row, col, num) {
+    // 既存の競合ハイライトをクリア
+    document.querySelectorAll('.conflict').forEach(cell => {
+        cell.classList.remove('conflict');
+    });
+    
+    // 行の競合をチェック
+    for (let j = 0; j < 9; j++) {
+        if (j !== col && currentPuzzle[row][j] === num) {
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${j}"]`);
+            cell.classList.add('conflict');
+        }
+    }
+    
+    // 列の競合をチェック
+    for (let i = 0; i < 9; i++) {
+        if (i !== row && currentPuzzle[i][col] === num) {
+            const cell = document.querySelector(`[data-row="${i}"][data-col="${col}"]`);
+            cell.classList.add('conflict');
+        }
+    }
+    
+    // 3x3ブロックの競合をチェック
+    const startRow = Math.floor(row / 3) * 3;
+    const startCol = Math.floor(col / 3) * 3;
+    for (let i = startRow; i < startRow + 3; i++) {
+        for (let j = startCol; j < startCol + 3; j++) {
+            if ((i !== row || j !== col) && currentPuzzle[i][j] === num) {
+                const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                cell.classList.add('conflict');
+            }
+        }
+    }
+    
+    // 3秒後に競合ハイライトを削除
+    setTimeout(() => {
+        document.querySelectorAll('.conflict').forEach(cell => {
+            cell.classList.remove('conflict');
+        });
+    }, 3000);
+}
+
 function selectDifficulty(level) {
     currentDifficulty = level;
     
     // 難易度選択パネルを非表示にする
     document.getElementById('difficulty-panel').style.display = 'none';
     
-    // ゲームコンテンツを表示する（この行が抜けていました）
+    // ゲームコンテンツを表示する
     document.getElementById('game-content').style.display = 'block';
     
     // プレイヤー情報を表示
     document.getElementById('player-info').style.display = 'flex';
     
-    // 現在の難易度を表示（HTMLの要素IDを修正）
+    // 現在の難易度を表示
     document.getElementById('current-difficulty').textContent = DIFFICULTY_SETTINGS[level].name;
     
     newGame();
@@ -514,6 +618,7 @@ function backToMenu() {
     
     // 難易度選択画面を表示
     document.getElementById('difficulty-panel').style.display = 'block';
+    document.getElementById('game-content').style.display = 'none';
     document.getElementById('player-info').style.display = 'none';
     
     // ボードをクリア
@@ -574,33 +679,49 @@ document.addEventListener('keydown', (e) => {
     } else if (key === 'r' || key === 'R') {
         e.preventDefault();
         resetCurrentPuzzle();
+    } else if (key === 'm' || key === 'M') {
+        e.preventDefault();
+        toggleMemoMode();
     }
 });
 
 // --- 11. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    // DOM要素を取得
+    gameBoard = document.getElementById('game-board');
+    numpad = document.getElementById('numpad');
+    message = document.getElementById('message');
+    
     // Initialize with empty board first
     initialPuzzle = Array(9).fill(0).map(() => Array(9).fill(0));
     currentPuzzle = Array(9).fill(0).map(() => Array(9).fill(0));
     
+    // メモ配列を初期化
+    notes = Array(9).fill(0).map(() => Array(9).fill(0).map(() => new Set()));
+    
     createBoard();
     createNumpad();
-    // 難易度選択ボタンのイベントリスナー
+    
     // 難易度選択ボタンのイベントリスナー
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const level = e.target.dataset.difficulty; // data-level → data-difficulty に変更
+            const level = e.target.dataset.difficulty;
             selectDifficulty(level);
         });
     });
     
-    // メニューボタンのイベントリスナー
-    newGameBtn.addEventListener('click', newGame);
-    resetBtn.addEventListener('click', resetCurrentPuzzle);
-    solveBtn.addEventListener('click', showSolution);
-    hintBtn.addEventListener('click', applyHint);
+    // メニューボタンのイベントリスナー（要素の存在確認を追加）
+    const newGameBtn = document.getElementById('new-game-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const solveBtn = document.getElementById('solve-btn');
+    const hintBtn = document.getElementById('hint-btn');
     
-    // トップ画面に戻るボタンのイベントリスナーを追加
+    if (newGameBtn) newGameBtn.addEventListener('click', newGame);
+    if (resetBtn) resetBtn.addEventListener('click', resetCurrentPuzzle);
+    if (solveBtn) solveBtn.addEventListener('click', showSolution);
+    if (hintBtn) hintBtn.addEventListener('click', applyHint);
+    
+    // トップ画面に戻るボタンのイベントリスナー
     const backToMenuBtn = document.getElementById('back-to-menu-btn');
     if (backToMenuBtn) {
         backToMenuBtn.addEventListener('click', backToMenu);
@@ -705,46 +826,24 @@ function autoCheckErrors() {
     }
 }
 
-// handleNumpadInput関数を修正（自動エラーチェックを追加）
-function handleNumpadInput(num) {
-    if (selectedCell.row === -1) {
-        showMessage('セルを選択してください', 'warning');
-        gameBoard.classList.add('shake');
-        setTimeout(() => gameBoard.classList.remove('shake'), 500);
-        return;
+function createNumpad() {
+    numpad.innerHTML = '';
+    for (let i = 1; i <= 9; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.addEventListener('click', () => handleNumpadInput(i));
+        numpad.appendChild(btn);
     }
+    const eraseBtn = document.createElement('button');
+    eraseBtn.textContent = 'X';
+    eraseBtn.addEventListener('click', () => handleNumpadInput(0));
+    numpad.appendChild(eraseBtn);
     
-    const { row, col } = selectedCell;
-    
-    if (initialPuzzle[row][col] !== 0) {
-        showMessage('この数字は変更できません', 'info');
-        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-        cell.classList.add('invalid-input');
-        setTimeout(() => cell.classList.remove('invalid-input'), 300);
-        return;
-    }
-
-    const previousValue = currentPuzzle[row][col];
-    
-    if (num === 0) {
-        currentPuzzle[row][col] = 0;
-    } else {
-        currentPuzzle[row][col] = num;
-        
-        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-        cell.classList.add('number-input');
-        setTimeout(() => cell.classList.remove('number-input'), 300);
-        
-        // 競合チェックと視覚的フィードバック
-        if (!isValidPlacement(row, col, num)) {
-            highlightConflicts(row, col, num);
-            showMessage('この数字は配置できません', 'error');
-        }
-    }
-    
-    updateCellDisplay(row, col);
-    
-    if (isSolved()) {
-        handleGameComplete();
-    }
+    // メモモードボタンを追加
+    const memoBtn = document.createElement('button');
+    memoBtn.id = 'memo-mode-btn';
+    memoBtn.classList.add('memo-toggle');
+    memoBtn.textContent = 'メモ';
+    memoBtn.addEventListener('click', toggleMemoMode);
+    numpad.appendChild(memoBtn);
 }

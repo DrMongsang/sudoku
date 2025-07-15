@@ -1,14 +1,19 @@
-/* 基本スタイル */
+/* Lo-Fi Zen Sudoku スタイル */
 :root {
-    --primary-color: #2196F3;
-    --secondary-color: #FFC107;
-    --success-color: #4CAF50;
-    --warning-color: #FF9800;
-    --error-color: #F44336;
-    --text-color: #333;
-    --bg-color: #f5f5f5;
-    --border-color: #ddd;
-    --cell-size: 40px;
+    /* Lo-Fi カラーパレット */
+    --primary-color: #8B7355;
+    --secondary-color: #D4A574;
+    --accent-color: #E8C5A0;
+    --success-color: #A8B5A0;
+    --warning-color: #D4A574;
+    --error-color: #C4A484;
+    --text-color: #5D4E37;
+    --text-light: #8B7355;
+    --bg-color: #F5F1EB;
+    --card-bg: #FEFCF8;
+    --border-color: #E0D5C7;
+    --shadow-color: rgba(139, 115, 85, 0.1);
+    --cell-size: 42px;
 }
 
 * {
@@ -23,136 +28,193 @@ html, body {
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-color);
+    font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #F5F1EB 0%, #EDE7DB 100%);
     color: var(--text-color);
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    padding: 10px;
+    padding: 20px;
+    font-weight: 300;
+    line-height: 1.6;
 }
 
 h1 {
     color: var(--primary-color);
-    margin-bottom: 20px;
+    margin-bottom: 8px;
     text-align: center;
-    font-size: 2rem;
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.subtitle {
+    color: var(--text-light);
+    text-align: center;
+    font-size: 0.9rem;
+    margin-bottom: 30px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    opacity: 0.8;
 }
 
 /* ゲームコンテナ */
 .game-content {
     width: 100%;
-    max-width: 500px;
+    max-width: 520px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 10px;
+    padding: 0 15px;
 }
 
 /* 難易度選択 */
 #difficulty-panel {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--shadow-color);
+    margin-bottom: 30px;
     text-align: center;
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
+    border: 1px solid var(--border-color);
+}
+
+#difficulty-panel h2 {
+    color: var(--primary-color);
+    font-weight: 400;
+    margin-bottom: 25px;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
 }
 
 #difficulty-buttons {
-    display: flex;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
     justify-content: center;
-    flex-wrap: wrap;
 }
 
 .difficulty-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background: var(--primary-color);
-    color: white;
+    padding: 15px 25px;
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    background: var(--card-bg);
+    color: var(--text-color);
     cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-    flex: 1;
-    min-width: 80px;
+    font-size: 15px;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.difficulty-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.difficulty-btn:hover::before {
+    left: 100%;
 }
 
 .difficulty-btn:hover {
-    background: #1976D2;
+    background: var(--accent-color);
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-color);
 }
 
 /* プレイヤー情報 */
 #player-info {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    margin-bottom: 25px;
     display: flex;
-    gap: 15px;
+    gap: 20px;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
     width: 100%;
+    border: 1px solid var(--border-color);
+    font-size: 14px;
+    color: var(--text-light);
 }
 
 #back-to-menu-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 5px;
-    background: var(--warning-color);
-    color: white;
+    padding: 10px 18px;
+    border: 2px solid var(--warning-color);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text-color);
     cursor: pointer;
-    font-size: 12px;
-    transition: background-color 0.3s;
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
 }
 
 #back-to-menu-btn:hover {
-    background: #F57C00;
+    background: var(--warning-color);
+    color: white;
+    transform: translateY(-1px);
 }
 
 #progress-bar {
-    width: 100px;
-    height: 10px;
-    background: #eee;
-    border-radius: 5px;
+    width: 120px;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 10px;
     overflow: hidden;
     position: relative;
 }
 
 #progress-fill {
     height: 100%;
-    background: var(--success-color);
-    transition: width 0.3s;
+    background: linear-gradient(90deg, var(--success-color), var(--secondary-color));
+    transition: width 0.5s ease;
+    border-radius: 10px;
 }
 
 #progress-text {
-    margin-left: 10px;
-    font-size: 12px;
+    margin-left: 12px;
+    font-size: 13px;
+    color: var(--text-light);
 }
 
 /* ゲームボード */
 #game-board {
     display: inline-block;
-    border: 3px solid var(--text-color);
-    background: white;
-    margin: 20px 0;
+    border: 3px solid var(--primary-color);
+    background: var(--card-bg);
+    margin: 25px 0;
     text-align: center;
     width: fit-content;
     max-width: 100%;
     overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px var(--shadow-color);
 }
 
 .row {
     display: flex;
 }
 
+/* セルスタイル */
 .cell {
+    position: relative;
     width: var(--cell-size);
     height: var(--cell-size);
     min-width: var(--cell-size);
@@ -162,272 +224,397 @@ h1 {
     align-items: center;
     justify-content: center;
     font-size: 18px;
-    font-weight: bold;
+    font-weight: 400;
     cursor: pointer;
-    background: white;
-    transition: background-color 0.2s;
+    background: var(--card-bg);
+    transition: all 0.2s ease;
     text-align: center;
+    color: var(--text-color);
 }
 
 .cell:nth-child(3n) {
-    border-right: 2px solid var(--text-color);
+    border-right: 2px solid var(--primary-color);
 }
 
 .row:nth-child(3n) .cell {
-    border-bottom: 2px solid var(--text-color);
+    border-bottom: 2px solid var(--primary-color);
 }
 
 .cell.selected {
-    background-color: #4CAF50 !important;
-    border: 3px solid #2E7D32;
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-    transform: scale(1.05);
-    transition: all 0.2s ease;
+    background: linear-gradient(135deg, var(--accent-color), var(--secondary-color)) !important;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 15px rgba(212, 165, 116, 0.4);
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+    color: var(--text-color);
 }
 
 .cell:hover {
-    background-color: #E8F5E8;
+    background: var(--accent-color);
     cursor: pointer;
-    transform: scale(1.02);
-    transition: all 0.1s ease;
+    transform: scale(1.01);
+    transition: all 0.2s ease;
 }
 
 .cell.pre-filled {
-    background-color: #e3f2fd;
+    background: linear-gradient(135deg, #F0EBE3, #E8DDD4);
     color: var(--primary-color);
+    font-weight: 500;
 }
 
 .cell.filled {
     color: var(--text-color);
+    font-weight: 400;
 }
 
 .cell.conflict {
-    background-color: #ffcdd2 !important;
-    border: 2px solid #f44336;
-    animation: pulse 0.5s ease-in-out;
+    background: linear-gradient(135deg, #F4E4D6, #E8C5A0) !important;
+    border: 2px solid var(--error-color);
+    animation: gentlePulse 1s ease-in-out;
 }
 
 /* 数字パッド */
 #numpad {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 5px;
-    margin: 20px 0;
+    gap: 8px;
+    margin: 25px 0;
     width: 100%;
-    max-width: 300px;
+    max-width: 320px;
     text-align: center;
 }
 
 #numpad button {
     width: 100%;
-    height: 40px;
-    min-width: 35px;
-    border: 1px solid var(--border-color);
-    background: white;
+    height: 45px;
+    min-width: 40px;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 400;
     cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.2s;
+    border-radius: 12px;
+    transition: all 0.3s ease;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--text-color);
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+#numpad button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.3), transparent);
+    transition: left 0.4s;
+}
+
+#numpad button:hover::before {
+    left: 100%;
 }
 
 #numpad button:hover {
-    background-color: var(--primary-color);
+    background: var(--secondary-color);
     color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--shadow-color);
 }
 
 /* メニュー */
 #menu {
     display: flex;
-    gap: 10px;
-    margin: 20px 0;
+    gap: 12px;
+    margin: 25px 0;
     flex-wrap: wrap;
     justify-content: center;
     width: 100%;
 }
 
 #menu button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    background: var(--primary-color);
-    color: white;
+    padding: 12px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--card-bg);
+    color: var(--text-color);
     cursor: pointer;
     font-size: 14px;
-    transition: background-color 0.3s;
+    font-weight: 400;
+    transition: all 0.3s ease;
     flex: 1;
-    min-width: 100px;
+    min-width: 110px;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+#menu button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(168, 181, 160, 0.3), transparent);
+    transition: left 0.4s;
+}
+
+#menu button:hover::before {
+    left: 100%;
 }
 
 #menu button:hover {
-    background: #1976D2;
+    background: var(--success-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--shadow-color);
 }
 
 #clear-errors-btn {
-    background: var(--error-color) !important;
+    border-color: var(--error-color) !important;
 }
 
 #clear-errors-btn:hover {
-    background: #D32F2F !important;
+    background: var(--error-color) !important;
 }
 
 /* メッセージ */
 #message {
     margin: 20px 0;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 15px 20px;
+    border-radius: 12px;
     text-align: center;
-    font-weight: bold;
+    font-weight: 400;
     min-height: 20px;
-    transition: all 0.3s ease;
+    transition: all 0.4s ease;
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
 }
 
 #message.info {
-    background-color: #e3f2fd;
+    background: linear-gradient(135deg, #F0EBE3, #E8DDD4);
     color: var(--primary-color);
-    border: 1px solid var(--primary-color);
+    border-color: var(--border-color);
 }
 
 #message.warning {
-    background-color: #fff3e0;
+    background: linear-gradient(135deg, #F4E8D0, #E8DCC6);
     color: var(--warning-color);
-    border: 1px solid var(--warning-color);
+    border-color: var(--warning-color);
 }
 
 #message.success {
-    background-color: #e8f5e8;
+    background: linear-gradient(135deg, #E8F0E8, #D4E4D4);
     color: var(--success-color);
-    border: 1px solid var(--success-color);
+    border-color: var(--success-color);
 }
 
 /* アニメーション */
-@keyframes shake {
+@keyframes gentleShake {
     0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
 }
 
-@keyframes pulse {
+@keyframes gentlePulse {
     0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    50% { transform: scale(1.02); }
     100% { transform: scale(1); }
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .shake {
-    animation: shake 0.5s ease-in-out;
+    animation: gentleShake 0.5s ease-in-out;
 }
 
 .invalid-input {
-    background-color: #ffebee !important;
-    animation: shake 0.3s ease-in-out;
+    background: linear-gradient(135deg, #F4E4D6, #E8C5A0) !important;
+    animation: gentleShake 0.4s ease-in-out;
 }
 
 .number-input {
-    background-color: #e8f5e8 !important;
-    transform: scale(1.1);
-    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #E8F0E8, #D4E4D4) !important;
+    transform: scale(1.05);
+    transition: all 0.4s ease;
+}
+
+/* メモ機能 */
+.cell-main-number {
+    font-size: 1.4em;
+    font-weight: 500;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    color: var(--text-color);
+}
+
+.cell-notes {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    font-size: 0.55em;
+    color: var(--text-light);
+    z-index: 1;
+}
+
+.note-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: 400;
+}
+
+.memo-mode {
+    background: linear-gradient(135deg, #E8F0E8, #D4E4D4) !important;
+    border: 2px solid var(--success-color) !important;
+}
+
+.memo-toggle {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+}
+
+.memo-toggle.active {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* ヒントハイライト */
+.hint-highlight {
+    background: linear-gradient(135deg, #FFF8E1, #F4E8D0) !important;
+    animation: hintGlow 1s ease-in-out;
+    border: 2px solid var(--secondary-color) !important;
+}
+
+@keyframes hintGlow {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(212, 165, 116, 0.4); }
+    50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(212, 165, 116, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(212, 165, 116, 0.4); }
 }
 
 /* レスポンシブデザイン */
 @media (max-width: 600px) {
     :root {
-        --cell-size: 35px;
+        --cell-size: 38px;
     }
     
     body {
-        padding: 5px;
+        padding: 15px;
     }
     
     h1 {
-        font-size: 1.5rem;
-        margin-bottom: 15px;
+        font-size: 2rem;
+        margin-bottom: 6px;
+    }
+    
+    .subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 25px;
     }
     
     .game-content {
-        padding: 0 5px;
+        padding: 0 10px;
     }
     
     #player-info {
         flex-direction: column;
-        gap: 10px;
-        padding: 10px;
+        gap: 12px;
+        padding: 15px;
     }
     
     #difficulty-buttons {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .difficulty-btn {
-        width: 100%;
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
     
     #menu {
         flex-direction: column;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
     }
     
     #menu button {
         width: 100%;
-        max-width: 200px;
+        max-width: 250px;
     }
     
     #numpad {
-        max-width: 280px;
+        max-width: 300px;
+        gap: 6px;
     }
 }
 
 @media (max-width: 400px) {
     :root {
-        --cell-size: 30px;
+        --cell-size: 32px;
     }
     
     body {
-        padding: 2px;
+        padding: 10px;
     }
     
     .cell {
-        font-size: 14px;
+        font-size: 15px;
     }
     
     #numpad {
-        gap: 3px;
-        max-width: 250px;
+        gap: 4px;
+        max-width: 270px;
     }
     
     #numpad button {
-        height: 35px;
-        font-size: 14px;
+        height: 40px;
+        font-size: 15px;
     }
     
     h1 {
-        font-size: 1.2rem;
+        font-size: 1.7rem;
+    }
+    
+    .subtitle {
+        font-size: 0.75rem;
     }
 }
 
 @media (max-width: 320px) {
     :root {
-        --cell-size: 25px;
+        --cell-size: 28px;
     }
     
     .cell {
-        font-size: 12px;
+        font-size: 13px;
     }
     
     #numpad {
-        max-width: 200px;
+        max-width: 240px;
     }
     
     #numpad button {
-        height: 30px;
-        font-size: 12px;
+        height: 35px;
+        font-size: 13px;
     }
 }
 
@@ -438,13 +625,13 @@ h1 {
     }
     
     #numpad button {
-        min-height: 40px;
+        min-height: 45px;
         touch-action: manipulation;
     }
     
     #menu button {
-        min-height: 45px;
-        padding: 12px 16px;
+        min-height: 48px;
+        padding: 14px 18px;
         touch-action: manipulation;
     }
 }
@@ -452,4 +639,31 @@ h1 {
 /* ダブルタップズーム無効化 */
 .game-board, #numpad, #menu {
     touch-action: manipulation;
+}
+
+/* 追加のアニメーション効果 */
+.game-content {
+    animation: fadeIn 0.6s ease-out;
+}
+
+#difficulty-panel {
+    animation: fadeIn 0.8s ease-out;
+}
+
+/* スクロールバーのスタイリング */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
 }
