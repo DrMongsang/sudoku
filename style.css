@@ -11,22 +11,43 @@
     --cell-size: 40px;
 }
 
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 20px;
     background-color: var(--bg-color);
     color: var(--text-color);
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
+    padding: 10px;
 }
 
 h1 {
     color: var(--primary-color);
     margin-bottom: 20px;
     text-align: center;
+    font-size: 2rem;
+}
+
+/* ゲームコンテナ */
+.game-content {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 10px;
 }
 
 /* 難易度選択 */
@@ -37,6 +58,8 @@ h1 {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     margin-bottom: 20px;
     text-align: center;
+    width: 100%;
+    max-width: 400px;
 }
 
 #difficulty-buttons {
@@ -55,6 +78,8 @@ h1 {
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.3s;
+    flex: 1;
+    min-width: 80px;
 }
 
 .difficulty-btn:hover {
@@ -63,17 +88,17 @@ h1 {
 
 /* プレイヤー情報 */
 #player-info {
-    display: none;
     background: white;
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     margin-bottom: 20px;
     display: flex;
-    gap: 20px;
+    gap: 15px;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 #back-to-menu-btn {
@@ -85,24 +110,10 @@ h1 {
     cursor: pointer;
     font-size: 12px;
     transition: background-color 0.3s;
-    margin-left: auto;
 }
 
 #back-to-menu-btn:hover {
     background: #F57C00;
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 600px) {
-    #player-info {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    #back-to-menu-btn {
-        margin-left: 0;
-        width: 100%;
-    }
 }
 
 #progress-bar {
@@ -131,7 +142,10 @@ h1 {
     border: 3px solid var(--text-color);
     background: white;
     margin: 20px 0;
-    text-align: center; /* 追加 */
+    text-align: center;
+    width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .row {
@@ -141,6 +155,8 @@ h1 {
 .cell {
     width: var(--cell-size);
     height: var(--cell-size);
+    min-width: var(--cell-size);
+    min-height: var(--cell-size);
     border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -150,7 +166,7 @@ h1 {
     cursor: pointer;
     background: white;
     transition: background-color 0.2s;
-    text-align: center; /* 追加 */
+    text-align: center;
 }
 
 .cell:nth-child(3n) {
@@ -159,10 +175,6 @@ h1 {
 
 .row:nth-child(3n) .cell {
     border-bottom: 2px solid var(--text-color);
-}
-
-.cell.shaded-block {
-    background-color: #f8f8f8;
 }
 
 .cell.selected {
@@ -189,8 +201,10 @@ h1 {
     color: var(--text-color);
 }
 
-.cell:hover {
-    background-color: #f0f0f0;
+.cell.conflict {
+    background-color: #ffcdd2 !important;
+    border: 2px solid #f44336;
+    animation: pulse 0.5s ease-in-out;
 }
 
 /* 数字パッド */
@@ -199,13 +213,15 @@ h1 {
     grid-template-columns: repeat(5, 1fr);
     gap: 5px;
     margin: 20px 0;
-    max-width: 250px;
-    text-align: center; /* 追加 */
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
 }
 
 #numpad button {
-    width: 40px;
+    width: 100%;
     height: 40px;
+    min-width: 35px;
     border: 1px solid var(--border-color);
     background: white;
     font-size: 16px;
@@ -213,10 +229,10 @@ h1 {
     cursor: pointer;
     border-radius: 5px;
     transition: background-color 0.2s;
-    text-align: center; /* 追加 */
-    display: flex; /* 追加 */
-    align-items: center; /* 追加 */
-    justify-content: center; /* 追加 */
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #numpad button:hover {
@@ -231,6 +247,7 @@ h1 {
     margin: 20px 0;
     flex-wrap: wrap;
     justify-content: center;
+    width: 100%;
 }
 
 #menu button {
@@ -242,10 +259,20 @@ h1 {
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.3s;
+    flex: 1;
+    min-width: 100px;
 }
 
 #menu button:hover {
     background: #1976D2;
+}
+
+#clear-errors-btn {
+    background: var(--error-color) !important;
+}
+
+#clear-errors-btn:hover {
+    background: #D32F2F !important;
 }
 
 /* メッセージ */
@@ -257,6 +284,8 @@ h1 {
     font-weight: bold;
     min-height: 20px;
     transition: all 0.3s ease;
+    width: 100%;
+    max-width: 400px;
 }
 
 #message.info {
@@ -277,59 +306,17 @@ h1 {
     border: 1px solid var(--success-color);
 }
 
-#message.hint-message {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    transform: scale(1.02);
-    animation: hintPulse 2s ease-in-out infinite;
-}
-
-@keyframes hintPulse {
-    0%, 100% { transform: scale(1.02); }
-    50% { transform: scale(1.05); }
-}
-
-/* レスポンシブデザイン */
-@media (max-width: 600px) {
-    :root {
-        --cell-size: 35px;
-    }
-    
-    body {
-        padding: 10px;
-    }
-    
-    #player-info {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    #menu {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    #menu button {
-        width: 200px;
-    }
-}
-
-@media (max-width: 400px) {
-    :root {
-        --cell-size: 30px;
-    }
-    
-    .cell {
-        font-size: 14px;
-    }
-}
-
+/* アニメーション */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 .shake {
@@ -347,41 +334,115 @@ h1 {
     transition: all 0.3s ease;
 }
 
-.conflict {
-    background-color: #ffcdd2 !important;
-    border: 2px solid #f44336;
-    animation: pulse 0.5s ease-in-out;
+/* レスポンシブデザイン */
+@media (max-width: 600px) {
+    :root {
+        --cell-size: 35px;
+    }
+    
+    body {
+        padding: 5px;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .game-content {
+        padding: 0 5px;
+    }
+    
+    #player-info {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    #difficulty-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .difficulty-btn {
+        width: 100%;
+    }
+    
+    #menu {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    #menu button {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    #numpad {
+        max-width: 280px;
+    }
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+@media (max-width: 400px) {
+    :root {
+        --cell-size: 30px;
+    }
+    
+    body {
+        padding: 2px;
+    }
+    
+    .cell {
+        font-size: 14px;
+    }
+    
+    #numpad {
+        gap: 3px;
+        max-width: 250px;
+    }
+    
+    #numpad button {
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    h1 {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 320px) {
+    :root {
+        --cell-size: 25px;
+    }
+    
+    .cell {
+        font-size: 12px;
+    }
+    
+    #numpad {
+        max-width: 200px;
+    }
+    
+    #numpad button {
+        height: 30px;
+        font-size: 12px;
+    }
 }
 
 /* タッチデバイス用の改善 */
 @media (max-width: 768px) {
     .cell {
-        min-height: 50px;
-        font-size: 20px;
         touch-action: manipulation;
-        text-align: center; /* 追加 */
-        display: flex; /* 確認 */
-        align-items: center; /* 確認 */
-        justify-content: center; /* 確認 */
     }
     
     #numpad button {
-        min-height: 50px;
-        font-size: 18px;
+        min-height: 40px;
         touch-action: manipulation;
-        text-align: center; /* 追加 */
-        display: flex; /* 確認 */
-        align-items: center; /* 確認 */
-        justify-content: center; /* 確認 */
     }
     
-    .menu button {
+    #menu button {
         min-height: 45px;
         padding: 12px 16px;
         touch-action: manipulation;
@@ -389,6 +450,6 @@ h1 {
 }
 
 /* ダブルタップズーム無効化 */
-.game-board, .numpad, .menu {
+.game-board, #numpad, #menu {
     touch-action: manipulation;
 }

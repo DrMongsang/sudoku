@@ -2,54 +2,69 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数独</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>数独ゲーム</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>数独</h1>
+    <h1>数独ゲーム</h1>
     
-    <!-- ゲームタブのみ（タブ機能削除） -->
-    <div id="game-content">
-        <!-- 難易度選択パネル（簡素化） -->
-        <div id="difficulty-panel">
-            <h3>難易度を選択してください</h3>
-            <div id="difficulty-buttons">
-                <button class="difficulty-btn" data-level="easy">初級</button>
-                <button class="difficulty-btn" data-level="medium">中級</button>
-                <button class="difficulty-btn" data-level="hard">上級</button>
-                <button class="difficulty-btn" data-level="expert">エキスパート</button>
-            </div>
+    <!-- 難易度選択パネル -->
+    <div id="difficulty-panel">
+        <h2>難易度を選択してください</h2>
+        <div id="difficulty-buttons">
+            <button class="difficulty-btn" data-level="easy">簡単</button>
+            <button class="difficulty-btn" data-level="medium">普通</button>
+            <button class="difficulty-btn" data-level="hard">難しい</button>
+            <button class="difficulty-btn" data-level="expert">エキスパート</button>
         </div>
+    </div>
 
-        <!-- プレイヤー情報パネル（簡素化） -->
+    <!-- ゲームコンテンツ -->
+    <div class="game-content" id="game-content" style="display: none;">
+        <!-- プレイヤー情報 -->
         <div id="player-info">
-            <div id="current-level">レベル: <span id="player-level">初級</span></div>
-            <div id="timer">時間: <span id="time-display">00:00</span></div>
-            <div id="progress-bar">
-                <div id="progress-fill"></div>
-                <span id="progress-text">0/10</span>
+            <div id="difficulty-display">難易度: <span id="current-difficulty"></span></div>
+            <div id="timer-display">時間: <span id="timer">00:00</span></div>
+            <div id="progress-container">
+                <div id="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+                <span id="progress-text">0/81</span>
             </div>
             <button id="back-to-menu-btn">メニューに戻る</button>
         </div>
 
+        <!-- ゲームボード -->
         <div id="game-board"></div>
-        
+
         <!-- 数字パッド -->
-        <div id="numpad"></div>
-        
-        <!-- 基本メニュー（簡素化） -->
+        <div id="numpad">
+            <button data-number="1">1</button>
+            <button data-number="2">2</button>
+            <button data-number="3">3</button>
+            <button data-number="4">4</button>
+            <button data-number="5">5</button>
+            <button data-number="6">6</button>
+            <button data-number="7">7</button>
+            <button data-number="8">8</button>
+            <button data-number="9">9</button>
+            <button data-number="0">消去</button>
+        </div>
+
+        <!-- メニュー -->
         <div id="menu">
-            <button id="new-game-btn">新しい問題</button>
-            <button id="reset-btn">やり直す</button>
-            <button id="solve-btn">答えを見る</button>
+            <button id="new-game-btn">新しいゲーム</button>
+            <button id="reset-btn">リセット</button>
             <button id="hint-btn">ヒント</button>
+            <button id="solution-btn">解答表示</button>
             <button id="clear-errors-btn">間違いを消去</button>
         </div>
-        
-        <p id="message"></p>
+
+        <!-- メッセージ表示 -->
+        <div id="message"></div>
     </div>
-    
+
     <script src="script.js"></script>
 </body>
 </html>

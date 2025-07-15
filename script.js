@@ -483,9 +483,19 @@ function updateTimer() {
 // --- 8. DIFFICULTY SELECTION ---
 function selectDifficulty(level) {
     currentDifficulty = level;
+    
+    // 難易度選択パネルを非表示にする
     document.getElementById('difficulty-panel').style.display = 'none';
+    
+    // ゲームコンテンツを表示する（この行が抜けていました）
+    document.getElementById('game-content').style.display = 'block';
+    
+    // プレイヤー情報を表示
     document.getElementById('player-info').style.display = 'flex';
-    document.getElementById('player-level').textContent = DIFFICULTY_SETTINGS[level].name;
+    
+    // 現在の難易度を表示（HTMLの要素IDを修正）
+    document.getElementById('current-difficulty').textContent = DIFFICULTY_SETTINGS[level].name;
+    
     newGame();
 }
 
@@ -575,11 +585,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     createBoard();
     createNumpad();
-    
+    // 難易度選択ボタンのイベントリスナー
     // 難易度選択ボタンのイベントリスナー
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const level = e.target.dataset.level;
+            const level = e.target.dataset.difficulty; // data-level → data-difficulty に変更
             selectDifficulty(level);
         });
     });
