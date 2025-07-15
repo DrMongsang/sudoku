@@ -223,6 +223,7 @@ function handleNumpadInput(num) {
         }
         
         updateCellDisplay(row, col);
+        updateProgress(); // 追加：通常モードでの数字入力時に達成度を更新
         
         if (isSolved()) {
             handleGameComplete();
