@@ -3,405 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数独マスター - 初心者からスペシャリストへ</title>
+    <title>数独</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>数独マスター</h1>
+    <h1>数独</h1>
     
-    <!-- ナビゲーションタブ -->
-    <div id="nav-tabs">
-        <button class="tab-btn active" data-tab="game">ゲーム</button>
-        <button class="tab-btn" data-tab="tutorial">チュートリアル</button>
-        <button class="tab-btn" data-tab="practice">練習</button>
-        <button class="tab-btn" data-tab="achievements">実績</button>
-        <button class="tab-btn" data-tab="analytics">分析</button>
-        <button class="tab-btn" data-tab="settings">設定</button>
-    </div>
-
-    <!-- ゲームタブ -->
-    <div id="game-tab" class="tab-content active">
-        <!-- AI アシスタントパネル -->
-        <div id="ai-assistant" class="floating-panel">
-            <div id="ai-header">
-                <h4>🤖 AIアシスタント</h4>
-                <button id="ai-toggle">−</button>
-            </div>
-            <div id="ai-content">
-                <div id="ai-suggestions">
-                    <h5>推奨アクション</h5>
-                    <div id="ai-recommendations"></div>
-                </div>
-                <div id="ai-analysis">
-                    <h5>盤面分析</h5>
-                    <div id="board-analysis"></div>
-                </div>
-                <div id="ai-learning">
-                    <h5>学習提案</h5>
-                    <div id="learning-suggestions"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 難易度選択パネル（拡張） -->
+    <!-- ゲームタブのみ（タブ機能削除） -->
+    <div id="game-content">
+        <!-- 難易度選択パネル（簡素化） -->
         <div id="difficulty-panel">
             <h3>難易度を選択してください</h3>
             <div id="difficulty-buttons">
-                <button class="difficulty-btn" data-level="beginner">入門 (4x4)</button>
                 <button class="difficulty-btn" data-level="easy">初級</button>
                 <button class="difficulty-btn" data-level="medium">中級</button>
                 <button class="difficulty-btn" data-level="hard">上級</button>
                 <button class="difficulty-btn" data-level="expert">エキスパート</button>
-                <button class="difficulty-btn" data-level="master">マスター</button>
-            </div>
-            
-            <!-- カスタム設定 -->
-            <div id="custom-settings">
-                <h4>カスタム設定</h4>
-                <div class="setting-group">
-                    <label>対称性:</label>
-                    <select id="symmetry-type">
-                        <option value="none">なし</option>
-                        <option value="rotational">回転対称</option>
-                        <option value="diagonal">対角対称</option>
-                    </select>
-                </div>
-                <div class="setting-group">
-                    <label>特殊制約:</label>
-                    <input type="checkbox" id="diagonal-constraint"> 対角線制約
-                    <input type="checkbox" id="irregular-regions"> 不規則領域
-                </div>
             </div>
         </div>
 
-        <!-- プレイヤー情報パネル（拡張） -->
+        <!-- プレイヤー情報パネル（簡素化） -->
         <div id="player-info">
-            <div id="current-level">レベル: <span id="player-level">入門</span></div>
+            <div id="current-level">レベル: <span id="player-level">初級</span></div>
             <div id="timer">時間: <span id="time-display">00:00</span></div>
             <div id="progress-bar">
                 <div id="progress-fill"></div>
                 <span id="progress-text">0/10</span>
             </div>
-            <div id="technique-tracker">
-                <span>使用テクニック: </span>
-                <div id="used-techniques"></div>
-            </div>
+            <button id="back-to-menu-btn">メニューに戻る</button>
         </div>
 
         <div id="game-board"></div>
         
-        <!-- 数字パッドをゲームボードの直下に移動 -->
+        <!-- 数字パッド -->
         <div id="numpad"></div>
         
-        <!-- 拡張メニュー -->
+        <!-- 基本メニュー（簡素化） -->
         <div id="menu">
             <button id="new-game-btn">新しい問題</button>
             <button id="reset-btn">やり直す</button>
             <button id="solve-btn">答えを見る</button>
             <button id="hint-btn">ヒント</button>
-            <button id="technique-btn">テクニック解説</button>
-            <button id="analyze-btn">盤面分析</button>
-            <button id="undo-btn">元に戻す</button>
-            <button id="redo-btn">やり直し</button>
-        </div>
-        
-        <!-- 高度なヒントパネル -->
-        <div id="advanced-hint-panel">
-            <div id="hint-tabs">
-                <button class="hint-tab active" data-hint-type="basic">基本ヒント</button>
-                <button class="hint-tab" data-hint-type="technique">テクニック</button>
-                <button class="hint-tab" data-hint-type="analysis">分析</button>
-            </div>
-            <div id="hint-content-area">
-                <div id="basic-hint" class="hint-content active"></div>
-                <div id="technique-hint" class="hint-content"></div>
-                <div id="analysis-hint" class="hint-content"></div>
-            </div>
+            <button id="clear-errors-btn">間違いを消去</button>
         </div>
         
         <p id="message"></p>
-    </div>
-
-    <!-- チュートリアルタブ -->
-    <div id="tutorial-tab" class="tab-content">
-        <div id="tutorial-container">
-            <h2>📚 チュートリアル</h2>
-            
-            <!-- チュートリアル選択 -->
-            <div id="tutorial-selection">
-                <div class="tutorial-grid">
-                    <div class="tutorial-card" data-tutorial="basic-rules">
-                        <h3>基本ルール</h3>
-                        <p>数独の基本的なルールを学びます</p>
-                        <div class="difficulty-badge beginner">入門</div>
-                    </div>
-                    <div class="tutorial-card" data-tutorial="naked-single">
-                        <h3>裸のシングル</h3>
-                        <p>最も基本的な解法テクニック</p>
-                        <div class="difficulty-badge easy">初級</div>
-                    </div>
-                    <div class="tutorial-card" data-tutorial="hidden-single">
-                        <h3>隠れたシングル</h3>
-                        <p>行・列・ブロック内での唯一解</p>
-                        <div class="difficulty-badge easy">初級</div>
-                    </div>
-                    <div class="tutorial-card" data-tutorial="naked-pair">
-                        <h3>裸のペア</h3>
-                        <p>2つのセルに同じ候補数字</p>
-                        <div class="difficulty-badge medium">中級</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- チュートリアル実行 -->
-            <div id="tutorial-execution" style="display: none;">
-                <h3 id="tutorial-title"></h3>
-                <div id="tutorial-content">
-                    <div id="tutorial-explanation"></div>
-                    <div id="tutorial-board"></div>
-                </div>
-                <div id="tutorial-navigation">
-                    <button id="tutorial-prev">前へ</button>
-                    <button id="tutorial-next">次へ</button>
-                    <button id="tutorial-back">戻る</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 練習タブ -->
-    <div id="practice-tab" class="tab-content">
-        <div id="practice-container">
-            <h2>🎯 練習モード</h2>
-            
-            <!-- 練習選択 -->
-            <div id="practice-selection">
-                <h3>練習したいテクニックを選択</h3>
-                <select id="technique-selector">
-                    <option value="naked-single">裸のシングル</option>
-                    <option value="hidden-single">隠れたシングル</option>
-                    <option value="naked-pair">裸のペア</option>
-                    <option value="pointing-pair">ポインティングペア</option>
-                </select>
-                <button id="start-practice">練習開始</button>
-                
-                <div id="practice-stats">
-                    <h4>練習統計</h4>
-                    <div class="stat-item">
-                        <span>現在のテクニック:</span>
-                        <span id="current-technique">-</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>進捗:</span>
-                        <span id="practice-progress">0/10</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>正解率:</span>
-                        <span id="practice-accuracy">0%</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 練習エリア -->
-            <div id="practice-area" style="display: none;">
-                <div id="practice-board"></div>
-                <div id="practice-controls">
-                    <button id="practice-hint">ヒント</button>
-                    <button id="practice-skip">スキップ</button>
-                    <button id="practice-finish">終了</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 実績タブ -->
-    <div id="achievements-tab" class="tab-content">
-        <div id="achievements-container">
-            <h2>🏆 実績・バッジ</h2>
-            
-            <!-- プレイヤー統計 -->
-            <div id="player-statistics">
-                <h3>プレイヤー統計</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h4>解決した問題</h4>
-                        <span id="total-solved" class="stat-number">0</span>
-                    </div>
-                    <div class="stat-card">
-                        <h4>平均時間</h4>
-                        <span id="average-time" class="stat-number">--:--</span>
-                    </div>
-                    <div class="stat-card">
-                        <h4>習得テクニック</h4>
-                        <span id="learned-techniques" class="stat-number">0/10</span>
-                    </div>
-                    <div class="stat-card">
-                        <h4>現在のランク</h4>
-                        <span id="current-rank" class="stat-number">初心者</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- バッジ表示 -->
-            <div id="badges-section">
-                <h3>獲得バッジ</h3>
-                <div id="badges-grid"></div>
-            </div>
-            
-            <!-- テクニック進捗 -->
-            <div id="technique-progress">
-                <h3>テクニック習得状況</h3>
-                <div id="technique-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 分析タブ -->
-    <div id="analytics-tab" class="tab-content">
-        <div id="analytics-container">
-            <h2>📊 詳細分析</h2>
-            
-            <!-- パフォーマンス分析 -->
-            <div id="performance-section">
-                <h3>パフォーマンス分析</h3>
-                <div id="performance-charts">
-                    <div class="chart-container">
-                        <h4>解答時間の推移</h4>
-                        <canvas id="time-chart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h4>難易度別正解率</h4>
-                        <canvas id="accuracy-chart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h4>テクニック使用頻度</h4>
-                        <canvas id="technique-chart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 学習進捗 -->
-            <div id="learning-progress">
-                <h3>学習進捗</h3>
-                <div id="skill-radar">
-                    <canvas id="skill-chart"></canvas>
-                </div>
-                <div id="weakness-analysis">
-                    <h4>弱点分析</h4>
-                    <div id="weakness-list"></div>
-                </div>
-                <div id="improvement-suggestions">
-                    <h4>改善提案</h4>
-                    <div id="suggestions-list"></div>
-                </div>
-            </div>
-            
-            <!-- 比較分析 -->
-            <div id="comparison-section">
-                <h3>比較分析</h3>
-                <div id="peer-comparison">
-                    <h4>同レベルプレイヤーとの比較</h4>
-                    <div id="comparison-chart"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 設定タブ -->
-    <div id="settings-tab" class="tab-content">
-        <div id="settings-container">
-            <h2>⚙️ 設定</h2>
-            
-            <!-- ゲーム設定 -->
-            <div class="settings-section">
-                <h3>ゲーム設定</h3>
-                <div class="setting-item">
-                    <label>自動候補数字表示:</label>
-                    <input type="checkbox" id="auto-candidates" checked>
-                </div>
-                <div class="setting-item">
-                    <label>エラー即時表示:</label>
-                    <input type="checkbox" id="instant-error" checked>
-                </div>
-                <div class="setting-item">
-                    <label>ヒントの詳細度:</label>
-                    <select id="hint-detail">
-                        <option value="minimal">最小限</option>
-                        <option value="moderate" selected>適度</option>
-                        <option value="detailed">詳細</option>
-                    </select>
-                </div>
-                <div class="setting-item">
-                    <label>AI支援レベル:</label>
-                    <select id="ai-assistance">
-                        <option value="off">オフ</option>
-                        <option value="minimal">最小限</option>
-                        <option value="moderate" selected>適度</option>
-                        <option value="full">フル</option>
-                    </select>
-                </div>
-            </div>
-            
-            <!-- 表示設定 -->
-            <div class="settings-section">
-                <h3>表示設定</h3>
-                <div class="setting-item">
-                    <label>テーマ:</label>
-                    <select id="theme-selector">
-                        <option value="light" selected>ライト</option>
-                        <option value="dark">ダーク</option>
-                        <option value="blue">ブルー</option>
-                        <option value="green">グリーン</option>
-                    </select>
-                </div>
-                <div class="setting-item">
-                    <label>アニメーション:</label>
-                    <input type="checkbox" id="animations" checked>
-                </div>
-                <div class="setting-item">
-                    <label>音効:</label>
-                    <input type="checkbox" id="sound-effects">
-                </div>
-            </div>
-            
-            <!-- 学習設定 -->
-            <div class="settings-section">
-                <h3>学習設定</h3>
-                <div class="setting-item">
-                    <label>学習目標:</label>
-                    <select id="learning-goal">
-                        <option value="speed">スピード重視</option>
-                        <option value="technique" selected>テクニック習得</option>
-                        <option value="accuracy">正確性重視</option>
-                    </select>
-                </div>
-                <div class="setting-item">
-                    <label>1日の目標問題数:</label>
-                    <input type="number" id="daily-goal" value="3" min="1" max="20">
-                </div>
-            </div>
-            
-            <!-- データ管理 -->
-            <div class="settings-section">
-                <h3>データ管理</h3>
-                <button id="export-data">データをエクスポート</button>
-                <button id="import-data">データをインポート</button>
-                <button id="reset-progress" class="danger-btn">進捗をリセット</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 高度なテクニック解説モーダル -->
-    <div id="advanced-technique-modal" class="modal">
-        <div class="modal-content large">
-            <span class="close">&times;</span>
-            <h2 id="technique-modal-title"></h2>
-            <div id="technique-modal-content">
-                <div id="technique-description"></div>
-                <div id="technique-examples"></div>
-                <div id="technique-practice"></div>
-            </div>
-        </div>
     </div>
     
     <script src="script.js"></script>
