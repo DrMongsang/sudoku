@@ -18,10 +18,10 @@ let gameStats = {
 
 // 難易度設定
 const DIFFICULTY_SETTINGS = {
-    easy: { name: '初級', cellsToRemove: 45 },
-    medium: { name: '中級', cellsToRemove: 50 },
-    hard: { name: '上級', cellsToRemove: 55 },
-    expert: { name: 'エキスパート', cellsToRemove: 60 }
+    easy: { name: '初級', cellsToRemove: 35 },
+    medium: { name: '中級', cellsToRemove: 42 },
+    hard: { name: '上級', cellsToRemove: 48 },
+    expert: { name: 'エキスパート', cellsToRemove: 52 }
 };
 
 // メモモード
@@ -34,19 +34,67 @@ function generatePuzzle() {
     initialPuzzle = JSON.parse(JSON.stringify(solution));
     
     const settings = DIFFICULTY_SETTINGS[currentDifficulty];
-    let attempts = settings.cellsToRemove;
+    let cellsToRemove = settings.cellsToRemove;
     
-    while (attempts > 0) {
-        const row = Math.floor(Math.random() * 9);
-        const col = Math.floor(Math.random() * 9);
-        if (initialPuzzle[row][col] !== 0) {
-            initialPuzzle[row][col] = 0;
-            attempts--;
+    // 解の一意性を保証しながらセルを削除
+    const cellPositions = [];
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            cellPositions.push([i, j]);
+        }
+    }
+    
+    // ランダムにシャッフル
+    shuffle(cellPositions);
+    
+    let removedCount = 0;
+    for (const [row, col] of cellPositions) {
+        if (removedCount >= cellsToRemove) break;
+        
+        const originalValue = initialPuzzle[row][col];
+        initialPuzzle[row][col] = 0;
+        
+        // 解の一意性をチェック
+        if (hasUniqueSolution(initialPuzzle)) {
+            removedCount++;
+        } else {
+            // 一意性が失われる場合は元に戻す
+            initialPuzzle[row][col] = originalValue;
         }
     }
     
     currentPuzzle = JSON.parse(JSON.stringify(initialPuzzle));
     notes = Array(9).fill(0).map(() => Array(9).fill(0).map(() => new Set()));
+}
+
+// 解の一意性をチェックする関数
+function hasUniqueSolution(puzzle) {
+    const testBoard = JSON.parse(JSON.stringify(puzzle));
+    const solutionCount = countSolutions(testBoard, 0);
+    return solutionCount === 1;
+}
+
+// 解の数を数える関数（最大2まで）
+function countSolutions(board, count) {
+    if (count > 1) return count; // 2つ以上見つかったら早期終了
+    
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            if (board[row][col] === 0) {
+                for (let num = 1; num <= 9; num++) {
+                    if (isValid(board, row, col, num)) {
+                        board[row][col] = num;
+                        count = countSolutions(board, count);
+                        board[row][col] = 0;
+                        
+                        if (count > 1) return count;
+                    }
+                }
+                return count;
+            }
+        }
+    }
+    return count + 1; // 完全に埋まった場合は解が1つ見つかった
 }
 
 function solve(board) {
@@ -845,5 +893,4 @@ function createNumpad() {
     memoBtn.classList.add('memo-toggle');
     memoBtn.textContent = 'メモ';
     memoBtn.addEventListener('click', toggleMemoMode);
-    numpad.appendChild(memoBtn);
-}
+    numpad.appendChild(memoBtn);}
